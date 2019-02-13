@@ -1,5 +1,3 @@
-from data_objects.speaker_verification_dataset import SpeakerVerificationDataset
-# from ui.speaker_matrix_ui import SpeakerMatrixUI
 from datetime import datetime
 from time import perf_counter as clock
 import matplotlib.pyplot as plt
@@ -9,6 +7,7 @@ import webbrowser
 import visdom
 import umap
 import sys
+from ..data_objects.speaker_verification_dataset import SpeakerVerificationDataset
 
 colormap = np.array([
     [76, 255, 0],

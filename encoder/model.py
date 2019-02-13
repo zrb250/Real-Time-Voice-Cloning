@@ -2,12 +2,12 @@ from scipy.interpolate import interp1d
 from sklearn.metrics import roc_curve
 from torch.nn.utils import clip_grad_norm_
 from scipy.optimize import brentq
-from params_model import *
-from params_data import *
-from config import device
 from torch import nn
 import numpy as np
 import torch
+from .params_model import *
+from .params_data import *
+from .config import device
 
 
 class SpeakerEncoder(nn.Module):

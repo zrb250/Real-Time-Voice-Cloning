@@ -11,6 +11,7 @@ voxceleb_datasets = ["voxceleb1", "voxceleb2"]
 anglophone_nationalites = ['australia', 'canada', 'ireland', 'uk', 'usa']
 clean_data_root = "E://Datasets//SpeakerEncoder"
 all_datasets = librispeech_datasets + voxceleb_datasets
+demo_datasets_root = "E://Datasets"
 
 model_dir = fileio.join(project_root, "saved_models")
 

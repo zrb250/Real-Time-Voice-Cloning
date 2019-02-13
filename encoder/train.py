@@ -1,11 +1,11 @@
-from data_objects.speaker_verification_dataset import SpeakerVerificationDataLoader
-from data_objects.speaker_verification_dataset import SpeakerVerificationDataset
-from ui.visualizations import Visualizations
-from params_model import *
-from config import *
-from model import SpeakerEncoder
 from vlibs import fileio
 import torch
+from .data_objects.speaker_verification_dataset import SpeakerVerificationDataLoader
+from .data_objects.speaker_verification_dataset import SpeakerVerificationDataset
+from .ui.visualizations import Visualizations
+from .params_model import *
+from .config import *
+from .model import SpeakerEncoder
 
 # Specify the run ID here. Note: visdom will group together run IDs starting with the same prefix
 # followed by an underscore.

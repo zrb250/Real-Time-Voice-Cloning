@@ -1,12 +1,12 @@
-from params_data import *
-from params_model import model_embedding_size
-from preprocess import preprocess_wave
-from config import model_dir, device
-from model import SpeakerEncoder
 from vlibs import fileio
 import numpy as np
-import audio
 import torch
+from .params_model import model_embedding_size
+from .params_data import *
+from .preprocess import preprocess_wave
+from .config import model_dir, device
+from .model import SpeakerEncoder
+from . import audio
 
 
 default_weights_fpath = fileio.join(model_dir, 'all.pt') 
@@ -75,8 +75,8 @@ def compute_partial_splits(n_samples, partial_utterance_n_frames=partial_utteran
     
     return wave_splits, mel_splits
 
-def embed_utterance(wave, using_partials=True, independant_partials=True,
-                    return_partial_embeds=False, return_partial_waves=False, **kwargs):
+def embed_utterance(wave, using_partials=True, return_partial_embeds=False, 
+                    return_wave_splits=False, **kwargs):
     """
     Computes an embedding for a single utterance.
     
@@ -85,18 +85,16 @@ def embed_utterance(wave, using_partials=True, independant_partials=True,
     <partial_utterance_n_frames> frames and the utterance embedding is computed from their 
     normalized average. If False, the utterance is instead computed from feeding the entire 
     spectogram to the network.
-    :param independant_partials: if True, partial utterances will TODO: is this even interesting?
     :param return_partial_embeds: if True, the partial embeddings will also be returned. Requires 
     <using_partials> to be True.
-    :param return_partial_waves: if True, the wave segments corresponding to the partial embeds 
+    :param return_wave_splits: if True, the wave split ranges corresponding to the partial embeds 
     will also be returned. Requires <using_partials> to be True.
     :param kwargs: additional arguments to compute_partial_splits()
     :return: the embedding as a numpy array of float32 of shape (model_embedding_size,), 
     the partial utterances as a numpy array of float32 of shape (n_partials, model_embedding_size,)
-    [optional] and the wave partials as a numpy array of float32 of shape (n_partials, n_samples)
-    [optional].
+    [optional] and the wave partials as a list of slices [optional].
     """
-    if not using_partials and (return_partial_embeds or independant_partials or return_partial_waves):
+    if not using_partials and (return_partial_embeds or return_wave_splits):
         raise ValueError("Cannot use partial utterances when complete utterance mode is set.")
     
     # Process the entire utterance if not using partials
@@ -118,14 +116,12 @@ def embed_utterance(wave, using_partials=True, independant_partials=True,
     # Compute the utterance embedding from the partial embeddings
     raw_embed = np.mean(partial_embeds, axis=0)
     embed = raw_embed / np.linalg.norm(raw_embed, 2)
-    out = [embed]
     
+    out = [embed]
     if return_partial_embeds:
         out.append(partial_embeds)
-    
-    if return_partial_waves:
-        out.append(np.array([wave[s] for s in wave_splits]))
-        
+    if return_wave_splits:
+        out.append(wave_splits)
     return tuple(out)
     
 def embed_stream(stream, partial_utterance_n_frames=partial_utterance_n_frames, overlap=0.5):

@@ -1,7 +1,7 @@
-from data_objects.speaker import Speaker
 from typing import List
 import numpy as np
-from params_data import mel_n_channels
+from ..data_objects.speaker import Speaker
+from ..params_data import mel_n_channels
 
 class SpeakerBatch:
     def __init__(self, speakers: List[Speaker], utterances_per_speaker: int, n_frames: int):

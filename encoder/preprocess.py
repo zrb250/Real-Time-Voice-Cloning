@@ -1,12 +1,11 @@
-import sys
-from vlibs.ui import console
-from vlibs import fileio
-from config import *
-import audio
-import numpy as np
-from datetime import datetime
-from params_data import *
 from pathos.multiprocessing import ThreadPool
+from datetime import datetime
+from vlibs import fileio
+import numpy as np
+import sys
+from .params_data import *
+from .config import *
+from . import audio
 
 class DatasetLog:
     """

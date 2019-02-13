@@ -1,13 +1,13 @@
-from data_objects.speaker_batch import SpeakerBatch
-from data_objects.speaker import Speaker
+from vlibs.structs.random_cycler import RandomCycler
 from torch.utils.data import Dataset, DataLoader
 from collections import OrderedDict
-from params_data import partial_utterance_n_frames
-from vlibs.structs.random_cycler import RandomCycler
 from vlibs import fileio
-from config import *
 import numpy as np
 import random
+from ..data_objects.speaker_batch import SpeakerBatch
+from ..data_objects.speaker import Speaker
+from ..params_data import partial_utterance_n_frames
+from ..config import *
 
 class SpeakerVerificationDataset(Dataset):
     def __init__(self, datasets):

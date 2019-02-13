@@ -1,3 +1,4 @@
+from scipy.ndimage.morphology import binary_dilation
 import matplotlib.pyplot as plt
 import librosa.display
 import librosa
@@ -5,8 +6,7 @@ import numpy as np
 import sounddevice
 import webrtcvad
 import struct
-from scipy.ndimage.morphology import binary_dilation
-from params_data import *
+from .params_data import *
 
 int16_max = (2 ** 15) - 1
 
