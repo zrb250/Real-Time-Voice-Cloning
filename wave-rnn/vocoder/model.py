@@ -1,10 +1,10 @@
 import torch
-import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
-from utils.display import *
-from params import *
-from utils import audio
+import numpy as np
+import time
+from vocoder.params import *
+
 
 class ResBlock(nn.Module):
     def __init__(self, dims):
@@ -185,13 +185,6 @@ class WaveRNN(nn.Module):
                 distrib = torch.distributions.Categorical(posterior)
 
                 sample = 2 * distrib.sample().float() / (self.n_classes - 1.) - 1.
-                # sample = distrib.sample()
-                # a = sample.detach().cpu().numpy().copy()
-                # sample = (sample.float() / (2 ** bits)) * 2 - 1
-                # if use_mu_law:
-                #     sample = torch.sign(sample) * (1 / (2 ** bits - 1)) * ((2 ** bits) ** 
-                #                                                            torch.abs(sample) - 1)
-                # assert np.allclose(audio.restore_signal(a), sample.detach().cpu().numpy())
                 output.append(sample)
                 x = sample.unsqueeze(-1)
                 
@@ -214,8 +207,8 @@ class WaveRNN(nn.Module):
     def gen_display(self, i, seq_len, b_size, start):
         gen_rate = (i + 1) / (time.time() - start) * b_size / 1000
         realtime_ratio = gen_rate * 1000 / self.sample_rate
-        stream('%i/%i -- batch_size: %i -- gen_rate: %.1f kHz -- x_realtime: %.1f  ',
-               (i * b_size, seq_len * b_size, b_size, gen_rate, realtime_ratio))
+        print('\r%i/%i -- batch_size: %i -- gen_rate: %.1f kHz -- x_realtime: %.1f  ',
+               (i * b_size, seq_len * b_size, b_size, gen_rate, realtime_ratio), end='')
     
     def get_gru_cell(self, gru):
         gru_cell = nn.GRUCell(gru.input_size, gru.hidden_size)

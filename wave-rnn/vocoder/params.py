@@ -14,7 +14,7 @@ mel_max_abs_value = 4
 # Whether or not to apply a mu-law to the audio before quantization (and after restoration of the
 # quantized signal). This results in a greater audio quality but also requires more steps to 
 # reach convergence.
-use_mu_law = False
+use_mu_law = True
 
 ## Model parameters
 # Number of bits for the encoding. Higher means higher quality output but longer training time 

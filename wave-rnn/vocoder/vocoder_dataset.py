@@ -1,8 +1,9 @@
 from torch.utils.data import Dataset
 from vlibs import fileio
 import numpy as np
-from params import *
-from utils import audio
+from vocoder.params import *
+from vocoder import audio
+
 
 class VocoderDataset(Dataset):
     def __init__(self, data_path):
