@@ -1,5 +1,4 @@
-from encoder.data_objects.speaker_verification_dataset import SpeakerVerificationDataLoader
-from encoder.data_objects.speaker_verification_dataset import SpeakerVerificationDataset
+from encoder.data_objects import SpeakerVerificationDataLoader, SpeakerVerificationDataset
 from encoder.ui.visualizations import Visualizations
 from encoder.params_model import *
 from encoder.model import SpeakerEncoder

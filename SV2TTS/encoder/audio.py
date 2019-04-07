@@ -11,25 +11,9 @@ from encoder.params_data import *
 int16_max = (2 ** 15) - 1
 
 def load(fpath):
-    """
-    Loads a single audio file as a raw waveform.
-    
-    :param fpath: path to the audio file
-    :param sampling_rate: the sampling rate of the audio. The audio will be resampled if the rate 
-    differs from the original audio. 
-    :return: the waveform as a numpy array of floats
-    """
     return librosa.load(fpath, sr=sampling_rate)[0]
 
 def wave_to_mel_filterbank(wave):
-    """
-    Converts a raw waveform into a mel spectrogram. Global parameters determine the window length
-    and the window step. 
-    
-    :param wave: the raw waveform as a numpy array of floats
-    :param sampling_rate: the sampling rate of the waveform
-    :return: the features as a numpy array of shape (length, mel_n)
-    """
     frames = librosa.feature.melspectrogram(
         wave, 
         sampling_rate,
