@@ -114,7 +114,7 @@ class Visualizations:
         time_string = "Step time:  mean: %5dms  std: %5dms" % \
                       (int(np.mean(self.step_times)), int(np.std(self.step_times)))
         print("\nStep %6d   Loss: %.4f   EER: %.4f   %s" %
-              (step, np.mean(self.losses), np.mean(self.eers), time_string), end="")
+              (step, np.mean(self.losses), np.mean(self.eers), time_string))
         if not self.disabled:
             self.loss_win = self.vis.line(
                 [np.mean(self.losses)],
