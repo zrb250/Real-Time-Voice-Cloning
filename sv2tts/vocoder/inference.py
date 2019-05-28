@@ -31,10 +31,17 @@ def load_model(weights_fpath, verbose=True):
     _model.load_state_dict(checkpoint['model_state'])
     _model.eval()
 
+
 def infer_waveform(mel, normalize=True, batched=True, target=8000, overlap=800):
     """
     Infers the waveform of a mel spectrogram output by the synthesizer (the format must match 
     that of the synthesizer!)
+    
+    :param normalize:  
+    :param batched: 
+    :param target: 
+    :param overlap: 
+    :return: 
     """
     if _model is None:
         raise Exception("Please load Wave-RNN in memory before using it")

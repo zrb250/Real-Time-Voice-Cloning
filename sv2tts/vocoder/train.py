@@ -17,27 +17,17 @@
 # Train this model to ~500k steps for 8/9bit linear samples or ~1M steps for 10bit linear or 9+bit 
 # mu_law. 
 
-import os
 import torch
 import torch.nn as nn
 from torch import optim
 from torch.utils.data import DataLoader
 from vocoder.vocoder_dataset import VocoderDataset
 from vocoder.model import WaveRNN
-from vlibs import fileio
 from vocoder.params import *
+from pathlib import Path
 import time
 import numpy as np
 
-
-model_dir = 'checkpoints'
-fileio.ensure_dir(model_dir)
-model_fpath = fileio.join(model_dir, model_name + '.pt')
-
-data_path = "../data/Synthesizer"
-# data_path = "E:/Datasets/Synthesizer"
-gen_path = 'model_outputs'
-fileio.ensure_dir(gen_path)
 
 def collate(batch) :
     max_offsets = [x[0].shape[-1] - (mel_win + 2 * pad) for x in batch]
@@ -56,10 +46,17 @@ def collate(batch) :
     
     return x_input, mels, y_coarse
 
-if __name__ == '__main__':
+
+def train(run_id: str, syn_dir: Path, voc_dir: Path, models_dir: Path, force_restart: bool):
     print_params()
     
-    dataset = VocoderDataset(data_path)
+    # Initialize the dataset
+    wav_dir = syn_dir.joinpath("audio")
+    gta_dir = voc_dir.joinpath("mels_gta")
+    metadata_fpath = voc_dir.joinpath("synthesized.txt")
+    dataset = VocoderDataset(metadata_fpath, gta_dir, wav_dir)
+    
+    # Initialize the model with default weights
     model = WaveRNN(
         rnn_dims=rnn_dims, 
         fc_dims=fc_dims, 
@@ -75,8 +72,12 @@ if __name__ == '__main__':
     )
     model = model.cuda()
     
+    # Load the weights
     global step
-    if os.path.exists(model_fpath):
+    model_dir = models_dir.joinpath(run_id)
+    model_dir.mkdir(exist_ok=True)
+    model_fpath = model_dir.joinpath(run_id + ".pt")
+    if not force_restart and model_fpath.exists():
         checkpoint = torch.load(model_fpath)
         step = checkpoint['step']
         model.load_state_dict(checkpoint['model_state'])
@@ -85,8 +86,10 @@ if __name__ == '__main__':
         step = 0
         print("Starting from scratch.")
     
+    # Train the model
     def train(model, optimiser, epochs, batch_size, classes, seq_len, step, lr=1e-4):
-        for p in optimiser.param_groups : p['lr'] = lr
+        for p in optimiser.param_groups:
+            p['lr'] = lr
         criterion = nn.NLLLoss().cuda()
         
         for e in range(epochs):

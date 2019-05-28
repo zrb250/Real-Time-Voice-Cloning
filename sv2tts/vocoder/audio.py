@@ -28,7 +28,7 @@ def quantize_signal(wav):
     """
     return ((wav + 1.) * (2 ** bits - 1) / 2).astype(np.int)
 
-def restore_signal(wav):
+def unquantize_signal(wav):
     """
     Decodes an integer signal (0 <= wav < 2^bits) to a floating point audio waveform (-1 < wav < 1)
     """
