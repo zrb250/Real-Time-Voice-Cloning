@@ -4,6 +4,8 @@ from encoder.audio import preprocess_wav   # We want to expose this function fro
 from matplotlib import cm
 from encoder import audio
 from pathlib import Path
+import matplotlib
+matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
