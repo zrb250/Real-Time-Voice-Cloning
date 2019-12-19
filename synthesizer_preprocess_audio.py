@@ -42,9 +42,9 @@ if __name__ == "__main__":
     args.out_dir.mkdir(exist_ok=True, parents=True)
 
     # Preprocess the dataset
-    print_args(args, parser)
     args.hparams = hparams.parse(args.hparams)
     # preprocess_librispeech(**vars(args))
+    print_args(args, parser)
     preprocess_func = {
         "librispeech": preprocess_librispeech,
         "vctk":preprocess_vctk,

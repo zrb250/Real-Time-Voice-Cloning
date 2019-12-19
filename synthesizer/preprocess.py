@@ -98,12 +98,14 @@ def preprocess_vctk(datasets_root: Path, out_dir: Path, n_processes: int,
 
     # Preprocess the dataset
     # speaker_dirs = list(chain.from_iterable(input_dir.glob("*") for input_dir in input_dirs))
-    func = partial(preprocess_vctk_speaker, out_dir=out_dir, skip_existing=skip_existing,
-                   hparams=hparams)
-    job = Pool(n_processes).imap(func, input_dirs)
-    for speaker_metadata in tqdm(job, "VCTK", len(input_dirs), unit="speakers"):
-        for metadatum in speaker_metadata:
-            metadata_file.write("|".join(str(x) for x in metadatum) + "\n")
+    # input_dirs = list(chain.from_iterable(input_dirs))
+    # func = partial(preprocess_vctk_speaker, out_dir=out_dir, skip_existing=skip_existing,
+    #                hparams=hparams)
+    # job = Pool(n_processes).imap(func, input_dirs)
+    # for speaker_metadata in tqdm(job, "VCTK", len(input_dirs), unit="speakers"):
+    speaker_metadata = preprocess_vctk_speaker(input_dirs, out_dir, skip_existing, hparams)
+    for metadatum in speaker_metadata:
+        metadata_file.write("|".join(str(x) for x in metadatum) + "\n")
     metadata_file.close()
 
     # Verify the contents of the metadata file
@@ -123,10 +125,15 @@ def preprocess_vctk(datasets_root: Path, out_dir: Path, n_processes: int,
 def preprocess_vctk_speaker(speaker_dir, out_dir: Path, skip_existing: bool, hparams):
     metadata = []
     fpath = speaker_dir.joinpath("wav_txt.list");
+    cnt = 0;
     for line in fpath:
         wavfname, words = line.split("\t");
         speaker_id, _ = wavfname.split("_");
         wav_fpath = speaker_dir.joinpath(speaker_id, wavfname + ".wav")
+        cnt = cnt + 1
+        if(cnt % 1000 == 0):
+            print("completed: %d" % cnt)
+
         assert wav_fpath.exists()
         # Load the audio waveform
         wav, _ = librosa.load(wav_fpath, hparams.sample_rate)
