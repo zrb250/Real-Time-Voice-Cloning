@@ -103,7 +103,7 @@ def preprocess_vctk(datasets_root: Path, out_dir: Path, n_processes: int,
     #                hparams=hparams)
     # job = Pool(n_processes).imap(func, input_dirs)
     # for speaker_metadata in tqdm(job, "VCTK", len(input_dirs), unit="speakers"):
-    speaker_metadata = preprocess_vctk_speaker(input_dirs, out_dir, skip_existing, hparams)
+    speaker_metadata = preprocess_vctk_speaker(input_dirs[0], out_dir, skip_existing, hparams)
     for metadatum in speaker_metadata:
         metadata_file.write("|".join(str(x) for x in metadatum) + "\n")
     metadata_file.close()
@@ -126,10 +126,10 @@ def preprocess_vctk_speaker(speaker_dir, out_dir: Path, skip_existing: bool, hpa
     metadata = []
     fpath = speaker_dir.joinpath("wav_txt.list");
     cnt = 0;
-    for line in fpath:
+    for line in open(fpath):
         wavfname, words = line.split("\t");
         speaker_id, _ = wavfname.split("_");
-        wav_fpath = speaker_dir.joinpath(speaker_id, wavfname + ".wav")
+        wav_fpath = speaker_dir.joinpath(speaker_id, wavfname)
         cnt = cnt + 1
         if(cnt % 1000 == 0):
             print("completed: %d" % cnt)
