@@ -212,8 +212,9 @@ def train(log_dir, args, hparams):
                 loss_window.append(loss)
                 message = "Step {:7d} [{:.3f} sec/step, loss={:.5f}, avg_loss={:.5f}]".format(
                     step, time_window.average, loss, loss_window.average)
-                log(message, end="\r", slack=(step % args.checkpoint_interval == 0))
-                print(message)
+                if(step % 10 == 0):
+                    log(message, end="\r", slack=(step % args.checkpoint_interval == 0))
+                    print(message)
                 
                 if loss > 100 or np.isnan(loss):
                     log("Loss exploded to {:.5f} at step {}".format(loss, step))
