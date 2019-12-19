@@ -127,22 +127,25 @@ def preprocess_vctk_speaker(speaker_dir, out_dir: Path, skip_existing: bool, hpa
     fpath = speaker_dir.joinpath("wav_txt.list");
     cnt = 0;
     for line in open(fpath):
-        wavfname, words = line.split("\t");
-        speaker_id, _ = wavfname.split("_");
-        wav_fpath = speaker_dir.joinpath(speaker_id, wavfname)
-        cnt = cnt + 1
-        if(cnt % 1000 == 0):
-            print("completed: %d" % cnt)
+        try:
+            wavfname, words = line.split("\t");
+            speaker_id, _ = wavfname.split("_");
+            wav_fpath = speaker_dir.joinpath(speaker_id, wavfname)
+            cnt = cnt + 1
+            if(cnt % 1000 == 0):
+                print("completed: %d" % cnt)
 
-        assert wav_fpath.exists()
-        # Load the audio waveform
-        wav, _ = librosa.load(wav_fpath, hparams.sample_rate)
-        if hparams.rescale:
-            wav = wav / np.abs(wav).max() * hparams.rescaling_max
-        sub_basename = "%s" % (wavfname)
-        metadata.append(process_utterance(wav, words.strip(), out_dir, sub_basename,
-                                                  skip_existing, hparams))
-
+            assert wav_fpath.exists()
+            # Load the audio waveform
+            wav, _ = librosa.load(wav_fpath, hparams.sample_rate)
+            if hparams.rescale:
+                wav = wav / np.abs(wav).max() * hparams.rescaling_max
+            sub_basename = "%s" % (wavfname)
+            metadata.append(process_utterance(wav, words.strip(), out_dir, sub_basename,
+                                                      skip_existing, hparams))
+        except:
+            print("except happend: ", line)
+            continue
     return [m for m in metadata if m is not None]
 
 def split_on_silences(wav_fpath, words, end_times, hparams):
