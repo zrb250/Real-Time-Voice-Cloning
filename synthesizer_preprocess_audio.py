@@ -1,4 +1,4 @@
-from synthesizer.preprocess import preprocess_librispeech
+from synthesizer.preprocess import preprocess_librispeech,preprocess_vctk
 from synthesizer.hparams import hparams
 from utils.argutils import print_args
 from pathlib import Path
@@ -24,6 +24,12 @@ if __name__ == "__main__":
         "interrupted.")
     parser.add_argument("--hparams", type=str, default="", help=\
         "Hyperparameter overrides as a comma-separated list of name-value pairs")
+
+    parser.add_argument("-d", "--datasets", type=str,
+                        default="librispeech,vctk", help= \
+                            "Comma-separated list of the name of the datasets you want to preprocess. Only the train "
+                            "set of these datasets will be used. Possible names: librispeech,vctk "
+                        )
     args = parser.parse_args()
     
     # Process the arguments
@@ -37,4 +43,13 @@ if __name__ == "__main__":
     # Preprocess the dataset
     print_args(args, parser)
     args.hparams = hparams.parse(args.hparams)
-    preprocess_librispeech(**vars(args))    
+    # preprocess_librispeech(**vars(args))
+    preprocess_func = {
+        "librispeech": preprocess_librispeech,
+        "vctk":preprocess_vctk,
+    }
+    args = vars(args)
+    for dataset in args.pop("datasets"):
+        print("Preprocessing %s" % dataset)
+        preprocess_func[dataset](**args)
+

@@ -14,7 +14,7 @@ def preprocess_librispeech(datasets_root: Path, out_dir: Path, n_processes: int,
                            skip_existing: bool, hparams):
     # Gather the input directories
     dataset_root = datasets_root.joinpath("LibriSpeech")
-    input_dirs = [dataset_root.joinpath("train-clean-100"), 
+    input_dirs = [dataset_root.joinpath("train-clean-100"),
                   dataset_root.joinpath("train-clean-360")]
     print("\n    ".join(map(str, ["Using data from:"] + input_dirs)))
     assert all(input_dir.exists() for input_dir in input_dirs)
@@ -79,6 +79,64 @@ def preprocess_speaker(speaker_dir, out_dir: Path, skip_existing: bool, hparams)
     
     return [m for m in metadata if m is not None]
 
+
+def preprocess_vctk(datasets_root: Path, out_dir: Path, n_processes: int,
+                           skip_existing: bool, hparams):
+    # Gather the input directories
+    dataset_root = datasets_root.joinpath("vctk");
+    input_dirs = [dataset_root.joinpath("wav")]
+    print("\n    ".join(map(str, ["Using data from:"] + input_dirs)))
+    assert all(input_dir.exists() for input_dir in input_dirs)
+
+    # Create the output directories for each output file type
+    out_dir.joinpath("mels").mkdir(exist_ok=True)
+    out_dir.joinpath("audio").mkdir(exist_ok=True)
+
+    # Create a metadata file
+    metadata_fpath = out_dir.joinpath("train.txt")
+    metadata_file = metadata_fpath.open("a" if skip_existing else "w", encoding="utf-8")
+
+    # Preprocess the dataset
+    # speaker_dirs = list(chain.from_iterable(input_dir.glob("*") for input_dir in input_dirs))
+    func = partial(preprocess_vctk_speaker, out_dir=out_dir, skip_existing=skip_existing,
+                   hparams=hparams)
+    job = Pool(n_processes).imap(func, input_dirs)
+    for speaker_metadata in tqdm(job, "VCTK", len(input_dirs), unit="speakers"):
+        for metadatum in speaker_metadata:
+            metadata_file.write("|".join(str(x) for x in metadatum) + "\n")
+    metadata_file.close()
+
+    # Verify the contents of the metadata file
+    with metadata_fpath.open("r", encoding="utf-8") as metadata_file:
+        metadata = [line.split("|") for line in metadata_file]
+    mel_frames = sum([int(m[4]) for m in metadata])
+    timesteps = sum([int(m[3]) for m in metadata])
+    sample_rate = hparams.sample_rate
+    hours = (timesteps / sample_rate) / 3600
+    print("The dataset consists of %d utterances, %d mel frames, %d audio timesteps (%.2f hours)." %
+          (len(metadata), mel_frames, timesteps, hours))
+    print("Max input length (text chars): %d" % max(len(m[5]) for m in metadata))
+    print("Max mel frames length: %d" % max(int(m[4]) for m in metadata))
+    print("Max audio timesteps length: %d" % max(int(m[3]) for m in metadata))
+
+
+def preprocess_vctk_speaker(speaker_dir, out_dir: Path, skip_existing: bool, hparams):
+    metadata = []
+    fpath = speaker_dir.joinpath("wav_txt.list");
+    for line in fpath:
+        wavfname, words = line.split("\t");
+        speaker_id, _ = wavfname.split("_");
+        wav_fpath = speaker_dir.joinpath(speaker_id, wavfname + ".wav")
+        assert wav_fpath.exists()
+        # Load the audio waveform
+        wav, _ = librosa.load(wav_fpath, hparams.sample_rate)
+        if hparams.rescale:
+            wav = wav / np.abs(wav).max() * hparams.rescaling_max
+        sub_basename = "%s" % (wavfname)
+        metadata.append(process_utterance(wav, words.strip(), out_dir, sub_basename,
+                                                  skip_existing, hparams))
+
+    return [m for m in metadata if m is not None]
 
 def split_on_silences(wav_fpath, words, end_times, hparams):
     # Load the audio waveform
