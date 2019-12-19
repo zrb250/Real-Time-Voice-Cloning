@@ -31,8 +31,9 @@ if __name__ == "__main__":
                             "set of these datasets will be used. Possible names: librispeech,vctk "
                         )
     args = parser.parse_args()
-    
+
     # Process the arguments
+    args.datasets = args.datasets.split(",")
     if not hasattr(args, "out_dir"):
         args.out_dir = args.datasets_root.joinpath("SV2TTS", "synthesizer")
 
