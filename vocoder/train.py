@@ -113,7 +113,7 @@ def train(run_id: str, syn_dir: Path, voc_dir: Path, models_dir: Path, ground_tr
                 f"steps/s | Step: {k}k | "
             stream(msg)
 
-
-        gen_testset(model, test_loader, hp.voc_gen_at_checkpoint, hp.voc_gen_batched,
-                    hp.voc_target, hp.voc_overlap, model_dir)
+        if(epoch % 50 == 0):
+            gen_testset(model, test_loader, hp.voc_gen_at_checkpoint, hp.voc_gen_batched,
+                        hp.voc_target, hp.voc_overlap, model_dir)
         print("")
