@@ -139,45 +139,50 @@ if __name__ == '__main__':
             # only use this function (with its default parameters):
             embed = encoder.embed_utterance(preprocessed_wav)
             print("Created the embedding")
+            print("embedding:", embed)
             
-            
-            ## Generating the spectrogram
-            text = input("Write a sentence (+-20 words) to be synthesized:\n")
-            
-            # The synthesizer works in batch, so you need to put your data in a list or numpy array
-            texts = [text]
-            embeds = [embed]
-            # If you know what the attention layer alignments are, you can retrieve them here by
-            # passing return_alignments=True
-            specs = synthesizer.synthesize_spectrograms(texts, embeds)
-            spec = specs[0]
-            print("Created the mel spectrogram")
-            
-            
-            ## Generating the waveform
-            print("Synthesizing the waveform:")
-            # Synthesizing the waveform is fairly straightforward. Remember that the longer the
-            # spectrogram, the more time-efficient the vocoder.
-            generated_wav = vocoder.infer_waveform(spec)
-            
-            
-            ## Post-generation
-            # There's a bug with sounddevice that makes the audio cut one second earlier, so we
-            # pad it.
-            generated_wav = np.pad(generated_wav, (0, synthesizer.sample_rate), mode="constant")
-            
-            # Play the audio (non-blocking)
-            if not args.no_sound:
-                sd.stop()
-                sd.play(generated_wav, synthesizer.sample_rate)
-                
-            # Save it on the disk
-            fpath = "demo_output_%02d.wav" % num_generated
-            print(generated_wav.dtype)
-            librosa.output.write_wav(fpath, generated_wav.astype(np.float32), 
-                                     synthesizer.sample_rate)
-            num_generated += 1
-            print("\nSaved output as %s\n\n" % fpath)
+
+            while(True):
+                ## Generating the spectrogram
+                text = input("Write a sentence (+-20 words) to be synthesized, Input Q to exit:\n")
+
+                if(text == "Q"):
+                    break
+
+                # The synthesizer works in batch, so you need to put your data in a list or numpy array
+                texts = [text]
+                embeds = [embed]
+                # If you know what the attention layer alignments are, you can retrieve them here by
+                # passing return_alignments=True
+                specs = synthesizer.synthesize_spectrograms(texts, embeds)
+                spec = specs[0]
+                print("Created the mel spectrogram")
+
+
+                ## Generating the waveform
+                print("Synthesizing the waveform:")
+                # Synthesizing the waveform is fairly straightforward. Remember that the longer the
+                # spectrogram, the more time-efficient the vocoder.
+                generated_wav = vocoder.infer_waveform(spec)
+
+
+                ## Post-generation
+                # There's a bug with sounddevice that makes the audio cut one second earlier, so we
+                # pad it.
+                generated_wav = np.pad(generated_wav, (0, synthesizer.sample_rate), mode="constant")
+
+                # Play the audio (non-blocking)
+                if not args.no_sound:
+                    sd.stop()
+                    sd.play(generated_wav, synthesizer.sample_rate)
+
+                # Save it on the disk
+                fpath = "demo_output_%02d.wav" % num_generated
+                print(generated_wav.dtype)
+                librosa.output.write_wav(fpath, generated_wav.astype(np.float32),
+                                         synthesizer.sample_rate)
+                num_generated += 1
+                print("\nSaved output as %s\n\n" % fpath)
             
             
         except Exception as e:
